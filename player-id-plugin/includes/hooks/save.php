@@ -23,7 +23,6 @@ function pid_check_player_id_on_login($user_login, $user) {
 
 // Display notice for users without Player ID
 add_action('admin_notices', 'pid_missing_player_id_notice');
-add_action('wp_head', 'pid_missing_player_id_frontend_notice');
 
 function pid_missing_player_id_notice() {
     if (!is_admin()) {

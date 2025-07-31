@@ -18,6 +18,7 @@ require_once __DIR__ . '/fields.php';
 // Load admin functionality
 require_once __DIR__ . '/admin/settings.php';
 require_once __DIR__ . '/admin/enqueue.php';
+require_once __DIR__ . '/admin/oauth-notice.php';
 
 // Load hooks
 require_once __DIR__ . '/hooks/save.php';
