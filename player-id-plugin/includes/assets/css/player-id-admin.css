@@ -1,0 +1,40 @@
+/**
+ * Player ID Admin Styles
+ */
+
+.player-id-feedback {
+    margin-left: 10px;
+    font-weight: 600;
+}
+
+.player-id-feedback.available {
+    color: #46b450;
+}
+
+.player-id-feedback.unavailable {
+    color: #dc3232;
+}
+
+/* Users list column */
+.column-player_id {
+    width: 15%;
+}
+
+/* Make missing Player IDs stand out */
+.column-player_id em {
+    color: #999;
+    font-style: italic;
+}
+
+/* Profile field styling */
+#player_id {
+    max-width: 25em;
+}
+
+/* Registration form */
+#registerform #player_id {
+    font-size: 24px;
+    width: 100%;
+    padding: 3px;
+    margin: 2px 6px 16px 0;
+}
