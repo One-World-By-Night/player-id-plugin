@@ -1,0 +1,65 @@
+wp-plugin-name
+├── includes
+│   ├── admin
+│   │   ├── enqueue.php
+│   │   ├── init.php
+│   │   └── settings.php
+│   ├── assets
+│   │   ├── css
+│   │   │   ├── select2.min.css
+│   │   │   └── style.css
+│   │   └── js
+│   │       ├── filter.js
+│   │       └── select2.min.js
+│   ├── classes
+│   ├── core
+│   │   ├── authorization.php
+│   │   ├── bootstrap.php
+│   │   └── init.php
+│   ├── docs
+│   │   ├── admin.md
+│   │   ├── api.md
+│   │   ├── developer.md
+│   │   ├── fields.md
+│   │   ├── hooks.md
+│   │   └── roadmap.md
+│   ├── fields.php
+│   ├── helper
+│   │   ├── init.php
+│   │   └── static-data.php
+│   ├── hooks
+│   │   ├── init.php
+│   │   ├── rest-api.php
+│   │   ├── save.php
+│   │   └── webhooks.php
+│   ├── init.php
+│   ├── languages
+│   │   ├── _template.php
+│   │   └── init.php
+│   ├── render
+│   │   ├── admin.php
+│   │   ├── detail.php
+│   │   ├── editor.php
+│   │   ├── init.php
+│   │   └── listing.php
+│   ├── shortcodes
+│   │   ├── detail.php
+│   │   ├── form.php
+│   │   ├── init.php
+│   │   └── listing.php
+│   ├── templates
+│   │   ├── detail.php
+│   │   ├── form.php
+│   │   ├── init.php
+│   │   └── listing.php
+│   ├── tests
+│   │   ├── core.php
+│   │   └── utils.php
+│   ├── tools
+│   │   ├── _template.php
+│   │   └── init.php
+│   └── utils
+│       ├── _template.php
+│       └── init.php
+├── readme.txt
+└── wp-plugin-name.php
