@@ -22,6 +22,8 @@ require_once __DIR__ . '/admin/enqueue.php';
 // Load hooks
 require_once __DIR__ . '/hooks/save.php';
 require_once __DIR__ . '/hooks/rest-api.php';
+require_once __DIR__ . '/hooks/oauth-integration.php';
+
 
 // Fire loaded action
 do_action('pid_plugin_loaded');
