@@ -1,90 +1,118 @@
 <?php
 /**
  * Plugin Name: WP OAuth Client - Player ID Integration
- * Description: Force saves player_id from OAuth SSO server
- * Version: 3.0.0
- */
+ * Description: Captures player_id from WP OAuth SSO server
+ * Version: 3.1.0
 
-// Check for player_id on EVERY page load for logged in users
-add_action('init', function() {
-    if (is_user_logged_in()) {
-        $user_id = get_current_user_id();
-        $player_id = get_user_meta($user_id, 'player_id', true);
-        
-        // If no player_id, try to get it from SSO
-        if (empty($player_id)) {
-            // Check if we just logged in via OAuth (URL contains oauth callback indicators)
-            $current_url = $_SERVER['REQUEST_URI'];
-            if (strpos($current_url, 'oauth') !== false || 
-                strpos($current_url, 'callback') !== false || 
-                strpos($current_url, 'login') !== false ||
-                isset($_GET['code']) ||
-                isset($_GET['state'])) {
+// Helper function to write to local debug.log
+function pid_log($message) {
+    $log_file = plugin_dir_path(__FILE__) . 'debug.log';
+    $timestamp = date('[Y-m-d H:i:s]');
+    file_put_contents($log_file, "$timestamp $message\n", FILE_APPEND);
+}
+
+// Intercept ALL HTTP responses to catch OAuth data
+add_filter('http_response', function($response, $args, $url) {
+    // Check if this is an OAuth endpoint
+    if (strpos($url, 'oauth') !== false || strpos($url, '/me') !== false) {
+        // Parse response body
+        $body = wp_remote_retrieve_body($response);
+        if ($body) {
+            $data = json_decode($body, true);
+            if (is_array($data) && isset($data['player_id'])) {
+                // Store it globally for immediate use
+                $GLOBALS['oauth_player_id_temp'] = $data['player_id'];
                 
-                // Add a one-time check flag
-                set_transient('check_oauth_' . $user_id, true, 60);
-            }
-        }
-    }
-});
-
-// Hook into wp_login - this ALWAYS fires when someone logs in
-add_action('wp_login', function($user_login, $user) {
-    // Mark this user for OAuth check
-    set_transient('check_oauth_' . $user->ID, true, 60);
-}, 10, 2);
-
-// On every page load, check if we need to fetch player_id
-add_action('wp', function() {
-    if (!is_user_logged_in()) return;
-    
-    $user_id = get_current_user_id();
-    
-    // Check if we should look for player_id
-    if (get_transient('check_oauth_' . $user_id)) {
-        delete_transient('check_oauth_' . $user_id);
-        
-        // Wait a second for OAuth data to propagate
-        sleep(1);
-        
-        // Make a direct call to get user data
-        global $wpdb;
-        
-        // Check all user meta for anything that might contain player_id
-        $all_meta = get_user_meta($user_id);
-        foreach ($all_meta as $key => $value) {
-            $data = maybe_unserialize($value[0]);
-            
-            // Check if it's JSON
-            if (is_string($data) && strpos($data, 'player_id') !== false) {
-                $json = json_decode($data, true);
-                if ($json && isset($json['player_id'])) {
-                    update_user_meta($user_id, 'player_id', $json['player_id']);
-                    break;
+                // Store in transient with multiple keys
+                set_transient('oauth_player_id_latest', $data['player_id'], 300);
+                
+                if (isset($data['user_email'])) {
+                    set_transient('oauth_player_id_' . md5($data['user_email']), $data['player_id'], 300);
+                }
+                if (isset($data['user_login'])) {
+                    set_transient('oauth_player_id_' . md5($data['user_login']), $data['player_id'], 300);
+                }
+                if (isset($data['ID'])) {
+                    set_transient('oauth_player_id_user_' . $data['ID'], $data['player_id'], 300);
                 }
             }
-            
-            // Check if it's an array
-            if (is_array($data) && isset($data['player_id'])) {
-                update_user_meta($user_id, 'player_id', $data['player_id']);
-                break;
+        }
+    }
+    
+    return $response;
+}, 10, 3);
+
+// When user is registered
+add_action('user_register', function($user_id) {
+    // Try multiple methods to get player_id
+    $player_id = null;
+    
+    // Method 1: Global variable
+    if (isset($GLOBALS['oauth_player_id_temp'])) {
+        $player_id = $GLOBALS['oauth_player_id_temp'];
+        unset($GLOBALS['oauth_player_id_temp']);
+    }
+    
+    // Method 2: Latest transient
+    if (!$player_id) {
+        $player_id = get_transient('oauth_player_id_latest');
+        if ($player_id) {
+            delete_transient('oauth_player_id_latest');
+        }
+    }
+    
+    // Method 3: Email-based transient
+    if (!$player_id) {
+        $user = get_user_by('id', $user_id);
+        if ($user) {
+            $player_id = get_transient('oauth_player_id_' . md5($user->user_email));
+            if ($player_id) {
+                delete_transient('oauth_player_id_' . md5($user->user_email));
             }
         }
     }
-});
-
-// Intercept ANY data that looks like OAuth user data
-add_action('update_user_meta', function($meta_id, $user_id, $meta_key, $meta_value) {
-    // Check if this meta might contain player_id
-    if (is_string($meta_value) && strpos($meta_value, 'player_id') !== false) {
-        $data = json_decode($meta_value, true);
-        if ($data && isset($data['player_id'])) {
-            update_user_meta($user_id, 'player_id', $data['player_id']);
-        }
-    } elseif (is_array($meta_value) && isset($meta_value['player_id'])) {
-        update_user_meta($user_id, 'player_id', $meta_value['player_id']);
+    
+    // Save player_id if found
+    if ($player_id) {
+        update_user_meta($user_id, 'player_id', $player_id);
+        $user = get_user_by('id', $user_id);
+        pid_log("New user: {$user->user_login} (ID: $user_id) | Player ID: $player_id");
     }
-}, 10, 4);
+}, 1);
+
+// When user logs in
+add_action('wp_login', function($user_login, $user) {
+    // Only process if user doesn't have player_id
+    $existing_player_id = get_user_meta($user->ID, 'player_id', true);
+    if (!$existing_player_id) {
+        $player_id = null;
+        
+        // Check global
+        if (isset($GLOBALS['oauth_player_id_temp'])) {
+            $player_id = $GLOBALS['oauth_player_id_temp'];
+            unset($GLOBALS['oauth_player_id_temp']);
+        }
+        
+        // Check transients
+        if (!$player_id) {
+            $player_id = get_transient('oauth_player_id_latest') ?: 
+                         get_transient('oauth_player_id_' . md5($user->user_email)) ?:
+                         get_transient('oauth_player_id_' . md5($user_login)) ?:
+                         get_transient('oauth_player_id_user_' . $user->ID);
+        }
+        
+        if ($player_id) {
+            update_user_meta($user->ID, 'player_id', $player_id);
+            pid_log("Existing user: {$user->user_login} (ID: {$user->ID}) | Player ID: $player_id");
+            
+            // Clean up transients
+            delete_transient('oauth_player_id_latest');
+            delete_transient('oauth_player_id_' . md5($user->user_email));
+            delete_transient('oauth_player_id_' . md5($user_login));
+            delete_transient('oauth_player_id_user_' . $user->ID);
+        }
+    }
+}, 1, 2);
 
 // Display in user profile
 add_action('show_user_profile', 'show_player_id_field');
@@ -118,33 +146,3 @@ add_filter('manage_users_custom_column', function($value, $column_name, $user_id
     }
     return $value;
 }, 10, 3);
-
-// LAST RESORT: Brute force check
-add_action('shutdown', function() {
-    if (!is_user_logged_in()) return;
-    
-    $user_id = get_current_user_id();
-    $player_id = get_user_meta($user_id, 'player_id', true);
-    
-    // If still no player_id, check EVERYTHING
-    if (empty($player_id)) {
-        // Check $_SESSION
-        if (isset($_SESSION)) {
-            foreach ($_SESSION as $key => $value) {
-                if (is_string($value) && strpos($value, 'GCH199909') !== false) {
-                    update_user_meta($user_id, 'player_id', 'GCH199909');
-                    break;
-                }
-                if (is_array($value) && isset($value['player_id'])) {
-                    update_user_meta($user_id, 'player_id', $value['player_id']);
-                    break;
-                }
-            }
-        }
-        
-        // For user 13 specifically, just set it
-        if ($user_id == 13) {
-            update_user_meta($user_id, 'player_id', 'GCH199909');
-        }
-    }
-});
