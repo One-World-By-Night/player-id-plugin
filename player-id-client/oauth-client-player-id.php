@@ -2,7 +2,8 @@
 /**
  * Plugin Name: WP OAuth Client - Player ID Integration
  * Description: Captures player_id from WP OAuth SSO server
- * Version: 3.1.0
+ * Version: 5.1.0
+ */
 
 // Helper function to write to local debug.log
 function pid_log($message) {
@@ -140,9 +141,23 @@ add_filter('manage_users_columns', function($columns) {
     return $columns;
 });
 
-add_filter('manage_users_custom_column', function($value, $column_name, $user_id) {
+// Show player_id in admin user list
+add_filter('manage_users_custom_column', 'pid_show_user_column_content', 10, 3);
+
+function pid_show_user_column_content($value, $column_name, $user_id) {
     if ('player_id' === $column_name) {
         return get_user_meta($user_id, 'player_id', true) ?: '-';
     }
     return $value;
-}, 10, 3);
+}
+
+// Add shortcode to display player_id
+add_shortcode('player_id', function() {
+    $user = wp_get_current_user();
+    if ($user->ID) {
+        return esc_html(get_user_meta($user->ID, 'player_id', true));
+    }
+    return '';
+});
+
+ 
