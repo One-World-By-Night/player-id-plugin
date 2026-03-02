@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/admin/oauth-notice.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author Your Name
- * Function: Display OAuth configuration information
- */
 
 defined('ABSPATH') || exit;
 

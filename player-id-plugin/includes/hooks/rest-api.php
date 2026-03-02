@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/hooks/rest-api.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author Your Name
- * Function: REST API endpoints for Player ID validation
- */
 
 defined('ABSPATH') || exit;
 

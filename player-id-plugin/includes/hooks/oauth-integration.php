@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/hooks/oauth-integration.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author greghacke
- * Function: Register Player ID with wp-oauth mapping
- */
 
 defined('ABSPATH') || exit;
 

@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/hooks/save.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author Your Name
- * Function: Save and validation hooks for Player ID
- */
 
 defined('ABSPATH') || exit;
 

@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/admin/enqueue.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author Your Name
- * Function: Enqueue admin assets
- */
 
 defined('ABSPATH') || exit;
 

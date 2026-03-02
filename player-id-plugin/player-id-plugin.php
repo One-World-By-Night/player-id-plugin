@@ -1,22 +1,20 @@
 <?php
 /**
  * Plugin Name: Player ID Plugin
- * Plugin URI: https://yoursite.com/player-id-plugin
+ * Plugin URI: https://github.com/One-World-By-Night/player-id-plugin
  * Description: Adds a mandatory, unique Player ID field to WordPress users with wp-oauth SSO integration
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: greghacke
- * Author URI: https://yoursite.com
+ * Author URI: https://www.owbn.net
  * License: GPL-2.0-or-later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: player-id-plugin
  * Domain Path: /languages
  */
 
-// Prevent direct access
 defined('ABSPATH') || exit;
 
-// Define plugin constants
-define('PID_PLUGIN_VERSION', '1.0.0');
+define('PID_PLUGIN_VERSION', '1.1.0');
 define('PID_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('PID_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PID_PLUGIN_BASENAME', plugin_basename(__FILE__));

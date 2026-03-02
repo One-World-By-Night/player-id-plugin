@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/init.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author Your Name
- * Function: Load all plugin components
- */
 
 defined('ABSPATH') || exit;
 

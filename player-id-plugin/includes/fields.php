@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/fields.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author greghacke
- * Function: Handle Player ID field display and validation
- */
 
 defined('ABSPATH') || exit;
 

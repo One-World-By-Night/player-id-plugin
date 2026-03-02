@@ -1,11 +1,4 @@
 <?php
-/**
- * File: includes/admin/settings.php
- * Text Domain: player-id-plugin
- * @version 1.0.0
- * @author greghacke
- * Function: Admin interface for Player ID management
- */
 
 defined('ABSPATH') || exit;
 
